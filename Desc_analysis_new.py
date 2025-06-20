@@ -48,8 +48,8 @@ if uploaded_file is not None:
                 "Mode": col_data.mode().iloc[0] if not col_data.mode().empty else np.nan,
                 "Std_Dev": np.std(col_data, ddof=1),
                 "CV (%)": (np.std(col_data, ddof=1) / np.mean(col_data)) * 100 if np.mean(col_data) != 0 else np.nan,
-                "Skewness": skew(col_data),
-                "Kurtosis": kurtosis(col_data),
+                "Skewness": skew(col_data, bias=False),  # Sample skewness as in Excel
+                "Kurtosis": kurtosis(col_data, fisher=True, bias=False),  # Sample excess kurtosis as in Excel
                 "Mean_Deviation": np.mean(np.abs(col_data - np.mean(col_data))),
                 "Count": len(col_data),
                 "Sum": np.sum(col_data),
@@ -96,9 +96,7 @@ if uploaded_file is not None:
             st.download_button("Download Numeric Statistics (CSV)", csv_num, "numeric_stats.csv", "text/csv")
             st.download_button("Download Categorical Statistics (CSV)", csv_cat, "categorical_stats.csv", "text/csv")
         else:
-            import openpyxl
             import xlsxwriter
-            import io
 
             output = io.BytesIO()
             with pd.ExcelWriter(output, engine='xlsxwriter') as writer:
